@@ -38,6 +38,7 @@ fn run() -> Result<ExitCode, Box<dyn std::error::Error>> {
         .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "Could not determine repo name"))?;
 
     rewrite_manifest(&manifest_path, repo_name)?;
+    ensure_gitattributes(&manifest_dir)?;
     Ok(ExitCode::SUCCESS)
 }
 
@@ -143,6 +144,31 @@ fn rewrite_manifest(manifest_path: &Path, repo_name: &str) -> Result<(), Box<dyn
     let mut output = lines.join("\n");
     output.push('\n');
     fs::write(manifest_path, output)?;
+    Ok(())
+}
+
+fn ensure_gitattributes(manifest_dir: &Path) -> Result<(), Box<dyn std::error::Error>> {
+    let gitattributes_path = manifest_dir.join(".gitattributes");
+    let entry = "tests/** linguist-vendored";
+
+    let existing = match fs::read_to_string(&gitattributes_path) {
+        Ok(text) => text,
+        Err(err) if err.kind() == io::ErrorKind::NotFound => String::new(),
+        Err(err) => return Err(Box::new(err)),
+    };
+
+    if existing.lines().any(|line| line.trim() == entry) {
+        return Ok(());
+    }
+
+    let mut output = existing;
+    if !output.is_empty() && !output.ends_with('\n') {
+        output.push('\n');
+    }
+    output.push_str(entry);
+    output.push('\n');
+
+    fs::write(gitattributes_path, output)?;
     Ok(())
 }
 
