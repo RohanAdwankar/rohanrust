@@ -1,0 +1,19 @@
+[package]
+name = "rohanrust"
+version = "0.1.0"
+edition = "2024"
+
+authors = ["Rohan Adwankar <rohan.adwankar@gmail.com>"]
+description = "rohanrust"
+repository = "https://github.com/RohanAdwankar/rohanrust"
+license = "MIT"
+keywords = ["rohanrust", "devtool"]
+
+[[bin]]
+name = "cargo-init-rohan"
+path = "src/main.rs"
+
+[dependencies]
+
+[lints.clippy]
+all = "warn"
